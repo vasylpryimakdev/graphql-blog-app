@@ -19,8 +19,10 @@ const server = new ApolloServer({
     Query,
     Mutation,
   },
-  context: {
-    prisma,
+  context: async ({ req }: any): Promise<Context> => {
+    return {
+      prisma,
+    };
   },
 });
 
