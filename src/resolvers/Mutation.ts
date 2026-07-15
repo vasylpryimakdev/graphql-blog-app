@@ -1,3 +1,4 @@
+import { Post, Prisma } from "@prisma/client";
 import { Context } from "..";
 
 interface PostArgs {
@@ -7,8 +8,19 @@ interface PostArgs {
   };
 }
 
-export const Query = {
-  postCreate: async (_: any, { post }: PostArgs, { prisma }: Context) => {
+interface PostPayloadType {
+  userErrors: {
+    message: string;
+  }[];
+  post: Post | Prisma.Prisma__PostClient<Post> | null;
+}
+
+export const Mutation = {
+  postCreate: async (
+    _: any,
+    { post }: PostArgs,
+    { prisma }: Context,
+  ): Promise<PostPayloadType> => {
     const { title, content } = post;
     if (!title || !content) {
       return {
@@ -22,10 +34,12 @@ export const Query = {
     }
 
     return {
+      userErrors: [],
       post: prisma.post.create({
         data: {
           title,
           content,
+          authorId: 1,
         },
       }),
     };
