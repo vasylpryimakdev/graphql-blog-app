@@ -44,4 +44,59 @@ export const Mutation = {
       }),
     };
   },
+  postUpdate: async (
+    _: any,
+    { post, postId }: { postId: string; post: PostArgs["post"] },
+    { prisma }: Context,
+  ): Promise<PostPayloadType> => {
+    const { title, content } = post;
+
+    if (!title && !content) {
+      return {
+        userErrors: [
+          {
+            message: "Need to have at least on e field to update",
+          },
+        ],
+        post: null,
+      };
+    }
+
+    const existingPost = await prisma.post.findUnique({
+      where: {
+        id: Number(postId),
+      },
+    });
+
+    if (!existingPost) {
+      return {
+        userErrors: [
+          {
+            message: "Post does not exist",
+          },
+        ],
+        post: null,
+      };
+    }
+
+    let payloadToUpdate = {
+      title,
+      content,
+    };
+
+    if (!title) delete payloadToUpdate.title;
+    if (!content) delete payloadToUpdate.content;
+
+    return {
+      userErrors: [],
+      post: prisma.post.update({
+        data: {
+          ...payloadToUpdate,
+        },
+        where: {
+          id: Number(postId),
+        },
+      }),
+    };
+  },
 };
